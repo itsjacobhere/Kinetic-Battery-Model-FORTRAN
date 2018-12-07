@@ -1,0 +1,100 @@
+---
+title: "Battery_plots"
+author: "Jacob Turner"
+date: "October 24, 2018"
+output: word_document
+---
+##Appendix (R studio Code)
+```{r}
+#set working directory:
+#Copy and paste file directory address here.
+setwd("G:\\My Drive\\HSU\\current_Semester\\F18\\Comp3\\Battery_Project\\final_program")
+library("data.table")
+library("ggplot2")
+library("reshape2")
+library(devtools)
+source_gist("524eade46135f6348140"
+            ,filename="ggplot_smooth_func.R")
+```
+This chunk tests the reading of each sensitivity analysis.
+```{r}
+c = fread("c1.csv")
+v = fread("v1.csv")
+r = fread("r1.csv")
+t = fread("t1.csv")
+```
+This chunk plots sensitivity analysis c,v,R,and t
+```{r}
+c = fread("c1.csv")
+v = fread("v1.csv")
+r = fread("r1.csv")
+t = fread("t1.csv")
+ggplot(v, aes(v$percent, y = v, color = Parameter))+
+  geom_point(aes(y = c$capacity, col = "c"))+
+  geom_point(aes(y = v$capacity, col = "V"))+
+  geom_point(aes(y = r$capacity, col = "R"))+
+  geom_point(aes(y = t$capacity, col = "t"))+
+  labs(x="Change in Parameter (%)", y = "Minimum Battery Capacity (mAh)")+
+  theme(legend.position = "top",legend.text = element_text(size=17),
+        axis.text.x = element_text(size=13),
+        axis.text.y = element_text(size=13),
+        axis.title = element_text(size=15))
+ggsave("sensitivity_time.png",width=12, height = 8)
+```
+This chunk plots the main parameters of only c, v and R
+```{r}
+c = fread("c1.csv")
+v = fread("v1.csv")
+r = fread("r1.csv")
+ggplot(v, aes(v$percent, y = v, color = Parameter))+
+  geom_point(aes(y = c$capacity, col = "c"))+
+  geom_point(aes(y = v$capacity, col = "V"))+
+  geom_point(aes(y = r$capacity, col = "R"))+
+  labs(x="Change in Parameter (%)", y = "Required Battery Capacity (mAh)")+
+  theme(legend.position = "top",legend.text = element_text(size=20),
+        axis.text.x = element_text(size=15),
+        axis.text.y = element_text(size=15),
+        axis.title = element_text(size=17))
+ggsave("sensitivity.png",width=12, height = 8)
+```
+Plotting the affect of time required on the initial charge, with equation formula
+```{r}
+t = fread("t1.csv")
+ggplot(data = t, aes(x = t$tgoal, y = t$capacity))+
+  geom_point(col = "darkgray", alpha = 0.99, size = 1)+
+  labs(x="Battery Runtime (minutes)", 
+       y = "Required Battery Capacity (mAh)")+
+  theme(legend.position = "top",legend.text = element_text(size=17),
+        axis.text.x = element_text(size=15),
+        axis.text.y = element_text(size=15),
+        axis.title = element_text(size=17))+
+  stat_smooth_func(geom="text"
+                   ,method="lm",hjust=-.5,vjust=1,parse=TRUE, size = 7)+
+  stat_smooth(method = lm)
+ggsave('t.png',width=12,height=8)
+```
+
+
+```{r}
+charge = fread("output_NEW_capacity.csv")
+charge
+```
+
+Plots the model of the charge in each well with time
+```{r}
+charge = fread("output_NEW_capacity.csv")
+
+ggplot(charge, aes(charge$`Time(minutes)`, y = charge, color = Location))+
+  geom_point(aes(y = charge$`Available(Coulombs)`, col = "Available"))+
+  geom_point(aes(y = charge$`Bound(Coulombs)`, col = "Bound"))+
+  geom_point(aes(y = charge$`Total Charge(Coulombs)`, col = "Total"))+
+  labs(x="Time (Minutes)", y = "Charge (Coulombs)")+
+  theme(legend.position = "top",legend.text = element_text(size=15),
+        axis.text.x = element_text(size=13),
+        axis.text.y = element_text(size=13),
+        axis.title = element_text(size=15))+
+  scale_y_continuous(breaks=seq(0,9000,1000))+
+  scale_x_continuous(breaks=seq(0,900,100))+
+  guides(colour = guide_legend(override.aes=list(size=2)))
+ggsave("model.png",width=12,height=8)
+```
